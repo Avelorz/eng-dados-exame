@@ -5,7 +5,6 @@ processar dados com PySpark e salvar resultados no Postgres e em arquivos (Parqu
 
 ## Requisitos
 - Docker e Docker Compose instalados.
-- (Opcional) `make`.
 
 ## Estrutura
 ```
@@ -27,7 +26,7 @@ Makefile
 ```
 
 ## Como executar
-1. Copie o `.env.example` para `.env` (se quiser mudar credenciais, host, etc.).
+1. Altere o `.env` (se quiser mudar credenciais, host, etc.).
 2. Suba os serviços:
    ```bash
    docker-compose up -d --build
@@ -45,10 +44,3 @@ Makefile
 - `ranking_mensal`
 - `ranking_trimestral`
 - `ranking_anual`
-
-## Observações de qualidade
-- Schemas explícitos (evita inferência inconsistente).
-- Limpeza: trim de strings, remoção de duplicatas exatas, padronização de datas.
-- Particionamento por ano/mês nos arquivos quando relevante.
-- Escrita idempotente/overwrite onde faz sentido e append controlado para tabelas.
-- Uso de variáveis de ambiente para credenciais e configurações.
