@@ -1,0 +1,44 @@
+services:
+  postgres:
+    build: ./docker/postgres
+    container_name: de-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-vendas_db}
+      POSTGRES_USER: ${DB_USER:-app_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-app_password}
+    ports:
+      - "5436:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  spark:
+    build:
+      context: .
+      dockerfile: ./docker/spark/Dockerfile
+    container_name: de-spark
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-vendas_db}
+      DB_USER: ${DB_USER:-app_user}
+      DB_PASSWORD: ${DB_PASSWORD:-app_password}
+      OUTPUT_DIR: ${OUTPUT_DIR:-/opt/app/output}
+      APP_WAREHOUSE_DIR: ${APP_WAREHOUSE_DIR:-/opt/app/warehouse}
+    volumes:
+      - ./jobs:/opt/app/jobs:ro
+      - ./run_all.sh:/opt/app/run_all.sh:ro
+      - ./data:/opt/app/data:ro
+      - ./output:/opt/app/output
+    working_dir: /opt/app
+    command: [ "/bin/bash", "-lc", "tail -f /dev/null" ]
+
+volumes:
+  pgdata:
